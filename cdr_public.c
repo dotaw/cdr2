@@ -163,13 +163,13 @@ int cdr_cpy_file(char *file_in, char *file_out)
     
     if ((fp_in = fopen(file_in, "r")) == NULL)
     {
-        cdr_diag_log(CDR_LOG_ERROR, "cdr_cpy_file faile, the file %s can not be opened.\r\n", file_in);
+        cdr_diag_log(CDR_LOG_ERROR, "cdr_cpy_file faile, the file %s can not be opened", file_in);
         return CDR_ERROR;
     }
     
     if ((fp_out = fopen(file_out, "a")) == NULL)
     {
-        cdr_diag_log(CDR_LOG_ERROR, "cdr_cpy_file faile, the file %s can not be opened.\r\n", file_out);
+        cdr_diag_log(CDR_LOG_ERROR, "cdr_cpy_file faile, the file %s can not be opened", file_out);
         return CDR_ERROR;
     }
     
@@ -216,6 +216,23 @@ int cdr_get_file_num(char *path, char *file_name)
     closedir(dir);
     return file_num;
 }
+
+void cdr_get_file_first_line(char *file_name, char *line_info, int len)
+{
+    FILE *fp;
+    
+    /* 读取文件，查看数据 */
+    if ((fp = fopen(file_name, "r")) == NULL)
+    {
+        cdr_diag_log(CDR_LOG_ERROR, "cdr_get_file_first_line faile, the file %s can not be opened", file_name);
+        return;
+    }
+    fgets(line_info, len, fp);
+    fclose(fp);
+    
+    return;
+}
+
 
 /* 获取path目录下创建时间最久的文件，带出的file_name是有目录的 */
 void cdr_get_oldest_filename(char *path, char *file_name)

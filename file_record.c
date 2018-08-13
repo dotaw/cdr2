@@ -155,7 +155,7 @@ void cdr_write_can_data_to_file(char *can_file, cdr_can_frame_t *data)
     FILE *fp;
     char time_info[30] = {0};
     char data_info[20] = {0};
-
+    
     if ((fp = fopen(can_file,"a")) == NULL)
     {
         cdr_diag_log(CDR_LOG_ERROR, "The file %s can not be opened", can_file);
@@ -163,21 +163,44 @@ void cdr_write_can_data_to_file(char *can_file, cdr_can_frame_t *data)
         return;
     }
     
-    /* 讲数据添加时间戳写入缓存文件cache.0 */
-    cdr_get_system_time(CDR_TIME_S_STANDARD, time_info);
-    fprintf(fp, "%s %04x %08llx %x\r\n", time_info, data->id, data->data, data->len); /* 数据均是十六进制保存 */
+    /* 讲数据添加时间戳写入文件 */
+    cdr_get_system_time(CDR_TIME_S_DIGITAL, time_info);
+    fprintf(fp, "%s %04x %08llx %x\n", time_info, data->id, data->data, data->len); /* 数据均是十六进制保存 */
     fclose(fp);
     
     g_system_event_occur[CDR_EVENT_FILE_RECORD_FAULT] = 0;
     return;
 }
 
-/* 当文件大于CDR_FILE_DIR_MAX_SIZE_BYTE时，需要另起新文件记录 */
-void cdr_can_data_file_proc(char *can_file, char *can_file_bf_dir)
+/* 存储空间不足时，需要删除旧文件
+    当文件大于CDR_FILE_DIR_MAX_SIZE_BYTE时，需要另起新文件记录 */
+void cdr_can_data_file_proc(char *can_file, char *dirinfo_file, char *can_file_bf_dir)
 {
     char time_info[30] = {0};
     char file_info[200] = {0};
+    char dir_info[200] = {0};
+    char command_info[200] = {0};
     char bf_dir[100] = {0};
+    DIR *dir;
+    FILE *fp;    
+    
+    /* 存储空间不足时，需要删除旧文件 */
+    if (g_system_event_occur[CDR_EVENT_STORAGE_NULL] == 1)
+    {
+        memset(dir_info, 0, sizeof(dir_info)); 
+        memset(command_info, 0, sizeof(command_info));
+        
+        /* 获取最旧的目录文件，然后删除 */                 
+        cdr_get_file_first_line(dirinfo_file, dir_info, sizeof(dir_info)); /* 获取最旧的目录 */         
+        sprintf(command_info, "rm -rf %s", dir_info);
+        system(command_info);        
+        printf("delete %s\r\n", dir_info);
+        
+        /* 删除第一行文件信息记录 */
+        memset(command_info, 0, sizeof(command_info));  
+        sprintf(command_info, "sed -i 1d %s", dirinfo_file);
+        system(command_info);
+    }
     
     if (get_file_size(can_file) < CDR_FILE_DIR_MAX_SIZE_BYTE)
     {
@@ -187,21 +210,40 @@ void cdr_can_data_file_proc(char *can_file, char *can_file_bf_dir)
     /* 查看是否存在当前日期的目录名，如果不存在，需要创建目录 */
     cdr_get_system_time(CDR_TIME_D_DIGITAL, time_info);
     sprintf(bf_dir, "%s%s", can_file_bf_dir, time_info);
-    if (opendir(bf_dir) == NULL)
+    dir = opendir(bf_dir);
+    if (dir == NULL)
     {
         if (mkdir(bf_dir, 0777) < 0);
         {
-            printf("mkdir %s, errno=%d\n", bf_dir,errno);
-            printf("Mesg:%s\n", strerror(errno));
+            cdr_diag_log(CDR_LOG_ERROR, "mkdir %s, errno=%d\n", bf_dir,errno);
+            cdr_diag_log(CDR_LOG_ERROR, "Mesg:%s\n", strerror(errno));
         }
+        
+        /* 将目录信息保存到文件信息中，便于后续查询 */
+        if ((fp = fopen(dirinfo_file, "a")) == NULL)
+        {
+            cdr_diag_log(CDR_LOG_ERROR, "The file %s can not be opened", dirinfo_file);
+            cdr_diag_log(CDR_LOG_ERROR, "errno=%d\n",errno);
+            cdr_diag_log(CDR_LOG_ERROR, "Mesg:%s\n",strerror(errno));
+        }
+        else
+        {
+            fprintf(fp, "%s\n", bf_dir);
+            fclose(fp);
+        }
+        
+    }
+    else
+    {
+        closedir(dir);
     }
     
     /* 文件移植到当日的目录下 */
     memset(time_info, 0, sizeof(time_info));
     memset(file_info, 0, sizeof(file_info));    
     cdr_get_system_time(CDR_TIME_MS_DIGITAL, time_info);
-    sprintf(file_info, CDR_FILE_DIAGLOG_BF_RECORD, time_info);
-    
+    sprintf(file_info, "%s/can%s.data", bf_dir, time_info);
+    rename(can_file, file_info);    
     return;
 }
 
@@ -312,8 +354,8 @@ void cdr_can_data_proc(cdr_can_frame_t *data)
     cdr_write_can_data_to_file(CDR_FILE_DISK1_CANDATA, data);
     cdr_write_can_data_to_file(CDR_FILE_DISK2_CANDATA, data);
     
-    cdr_can_data_file_proc(CDR_FILE_DISK1_CANDATA, CDR_FILE_DIR_DISK1_CANDATA_BF);
-    cdr_can_data_file_proc(CDR_FILE_DISK2_CANDATA, CDR_FILE_DIR_DISK2_CANDATA_BF);
+    cdr_can_data_file_proc(CDR_FILE_DISK1_CANDATA, CDR_FILE_DISK1_DIR_INFO, CDR_FILE_DIR_DISK1_CANDATA_BF);
+    cdr_can_data_file_proc(CDR_FILE_DISK2_CANDATA, CDR_FILE_DISK2_DIR_INFO, CDR_FILE_DIR_DISK2_CANDATA_BF);
     
     g_system_event_occur[CDR_EVENT_DATA_RECORDING] = 1;
     return;
