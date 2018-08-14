@@ -5,6 +5,7 @@ void main()
     pthread_t pthread_record_data;
     pthread_t pthread_fmea;
     pthread_t pthread_led;
+    pthread_t pthread_usb;
     
     /* 1、全局初始化，初始化全局变量，如果程序需要的目录不存在，需要创建目录 */
     cdr_global_init();
@@ -51,7 +52,14 @@ void main()
     }
     cdr_diag_log(CDR_LOG_INFO, "pthread_create cdr_led_control ..............................ok");
 
-    /* 8、打开看门狗 */
+    /* 8、u盘检测线程创建 */
+    if (cdr_creat_pthread_usb_detect(&pthread_usb) != CDR_OK) 
+    {
+        cdr_diag_log(CDR_LOG_ERROR, "pthread_create  cdr_usb_detect error");
+    }
+    cdr_diag_log(CDR_LOG_INFO, "pthread_create cdr_usb_detect ..............................ok");
+        
+    /* 9、打开看门狗 */
     if (cdr_main_init_watch_dog() != CDR_OK)
     {
         cdr_diag_log(CDR_LOG_ERROR, "cdr_main_init_watch_dog error");
@@ -59,13 +67,14 @@ void main()
         return;        
     }
     
-    /* 9、点灯：绿色常亮 */
+    /* 10、点灯：绿色常亮 */
     cdr_set_led_state(CDR_LED_GREEN_CONTINUOUS);    
   
-    /* 10、等待线程结束 */
+    /* 11、等待线程结束 */
     pthread_join(pthread_fmea, NULL);
     pthread_join(pthread_record_data, NULL);
     pthread_join(pthread_led, NULL);
+    pthread_join(pthread_usb, NULL);
     
     /* 11、结束处理 */
     write(g_wdt_fd, "V", 1);
@@ -265,6 +274,29 @@ int cdr_creat_pthread_led_control(pthread_t *pthread_led)
     }
     
     cdr_diag_log(CDR_LOG_ERROR, "cdr_creat_pthread_led_control ..............................fail");
+    return CDR_ERROR;
+}
+
+
+/* 启动u盘检测线程，如果失败，尝试3次，3次都失败，上报失败 */
+int cdr_creat_pthread_usb_detect(pthread_t *pthread_usb)
+{
+    int i;
+    int ret;
+
+    for (i = 0; i < CDR_FAIL_TRY_TIMES; i++)
+    {
+        ret = pthread_create(pthread_usb, NULL, (void *)&cdr_usb_detect, NULL);  /* 线程创建 */
+        if (ret != CDR_OK) 
+        {
+            cdr_diag_log(CDR_LOG_ERROR, "cdr_creat_pthread_usb_detect error, ret=0x%x, times=%u", ret, i);
+            continue;
+        }
+        cdr_diag_log(CDR_LOG_INFO, "cdr_creat_pthread_usb_detect ..............................ok");
+        return CDR_OK;
+    }
+    
+    cdr_diag_log(CDR_LOG_ERROR, "cdr_creat_pthread_usb_detect ..............................fail");
     return CDR_ERROR;
 }
 

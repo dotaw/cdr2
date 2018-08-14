@@ -106,11 +106,13 @@ typedef enum cdr_led_state {
 } cdr_led_state_t;
 
 typedef enum cdr_event {  
-    CDR_EVENT_FILE_RECORD_FAULT = 1,    /* 1、文件记录事件 */
+    CDR_EVENT_FILE_RECORD_FAULT = 1,    /* 1、文件记录故障事件 */
     CDR_EVENT_STORAGE_WARNING,          /* 2、存储空间不足提示事件 */
     CDR_EVENT_STORAGE_ALARM,            /* 3、存储空间不足告警事件 */
     CDR_EVENT_STORAGE_NULL,             /* 4、存储空间不足事件 */
     CDR_EVENT_DATA_RECORDING,           /* 5、数据正常存储事件 */
+    CDR_EVENT_USB_PULL_IN,              /* 6、usb设备插入 */
+    CDR_EVENT_DATA_TO_USB,              /* 7、cpy数据到usb设备 */
     CDR_EVENT_MAX,
 } cdr_event_t;
 
@@ -158,6 +160,7 @@ void cdr_diag_log(int type, const char *format, ...);
 void cdr_set_led_state(int type);
 void cdr_system_reboot();
 void cdr_led_control();
+void cdr_usb_detect();
 
 /* file_record */
 void cdr_record_can_data();

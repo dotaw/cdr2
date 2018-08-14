@@ -71,9 +71,9 @@ void cdr_fmea_set_led_state(int led_state)
     {
         /* 优先级排列，越前面，优先级别越高 */
         CDR_LED_RED_CONTINUOUS, 
-        CDR_LED_RED_FLASH, 
-        CDR_LED_YELLOW_CONTINUOUS, 
+        CDR_LED_RED_FLASH,        
         CDR_LED_YELLOW_FLASH,
+        CDR_LED_YELLOW_CONTINUOUS, 
         CDR_LED_GREEN_FLASH, 
         CDR_LED_GREEN_CONTINUOUS,
     }; 
@@ -109,6 +109,8 @@ void cdr_fmea_system_event_led_proc()
         {CDR_EVENT_STORAGE_WARNING,        CDR_LED_YELLOW_FLASH},
         {CDR_EVENT_DATA_RECORDING,         CDR_LED_GREEN_FLASH},
         {CDR_EVENT_STORAGE_NULL,           CDR_LED_RED_FLASH},
+        {CDR_EVENT_USB_PULL_IN,            CDR_LED_GREEN_CONTINUOUS},
+        {CDR_EVENT_DATA_TO_USB,            CDR_LED_YELLOW_FLASH},
     };
     
     for (i = 0; i < CDR_EVENT_MAX - CDR_EVENT_FILE_RECORD_FAULT; i++)
@@ -121,7 +123,8 @@ void cdr_fmea_system_event_led_proc()
         {
             if (!g_system_event_occur_his[event]) /* 历史无故障 */
             {
-                if (event != CDR_EVENT_DATA_RECORDING)
+                if ((event != CDR_EVENT_DATA_RECORDING) 
+                    || (event != CDR_EVENT_USB_PULL_IN) || (event != CDR_EVENT_DATA_TO_USB))
                 {
                     cdr_diag_log(CDR_LOG_ERROR, "cdr_fmea_system_event_led_proc fault %u occurrence", event); /* 第一次发生，并且事件不是CDR_EVENT_DATA_RECORDING，记录日志 */
                 }
@@ -148,7 +151,8 @@ void cdr_fmea_system_event_led_proc()
             
             if (g_system_event_occur_his[event]) /* 历史有故障 */
             {    
-                if (event != CDR_EVENT_DATA_RECORDING)
+                if ((event != CDR_EVENT_DATA_RECORDING) 
+                    || (event != CDR_EVENT_USB_PULL_IN) || (event != CDR_EVENT_DATA_TO_USB))
                 {
                     cdr_diag_log(CDR_LOG_INFO, "cdr_fmea_system_event_led_proc fault %u recover", event); /* 故障恢复，并且事件不是CDR_EVENT_DATA_RECORDING，记录日志 */
                 }

@@ -525,6 +525,82 @@ void cdr_led_control()
     return;
 }
 
+void cdr_cpy_data_to_usb(char *data_dir, char *usb_dir, char *usb_dir_name)
+{
+    char command[200] = {0};    
+    
+    sprintf(command, "mkdir %s/%s", usb_dir, usb_dir_name);
+    system(command);
+    
+    memset(command, 0, sizeof(command));
+    sprintf(command, "cp -rf %s %s/%s", data_dir, usb_dir, usb_dir_name);
+    system(command);
+    
+    return;
+}
+
+void cdr_usb_detect()
+{
+    DIR *dir = NULL;
+    struct dirent *ptr = NULL;
+    int usb_insert = 0;
+    int usb_insert_his = 0;
+    char usb_dir[200] = {0};
+    
+    cdr_diag_log(CDR_LOG_INFO, "cdr_usb_detect >>>>>>>>>>>>>>>>>>>>>>>>>>in");
+    
+    while (1) 
+    {
+        sleep(5); /* 延时5s */
+        
+        usb_insert = 0;
+        dir = opendir("/media/");
+        while((ptr = readdir(dir)) != NULL)
+        {
+            if (ptr->d_type == 4) //4：代表目录类型
+            {
+                if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0)
+                {
+                    continue;
+                }
+                
+                usb_insert = 1;
+                memset(usb_dir, 0, sizeof(usb_dir));
+                sprintf(usb_dir, "/media/%s", ptr->d_name);
+                break;
+            }
+        }
+        
+        /* 状态变化，打印日志 */
+        if (usb_insert != usb_insert_his)
+        {
+            if (usb_insert)
+            {
+                cdr_diag_log(CDR_LOG_INFO, "usb pull in, dir: %s", usb_dir);
+                g_system_event_occur[CDR_EVENT_USB_PULL_IN] = 1;
+                
+                sleep(3); /* 延时3s */
+                
+                g_system_event_occur[CDR_EVENT_DATA_TO_USB] = 1;
+                cdr_cpy_data_to_usb(CDR_FILE_DIR_DISK1_CANDATA, usb_dir, "can_data_disk1");
+                cdr_cpy_data_to_usb(CDR_FILE_DIR_DISK2_CANDATA, usb_dir, "can_data_disk2");
+                g_system_event_occur[CDR_EVENT_DATA_TO_USB] = 1;
+            }
+            else
+            {
+                cdr_diag_log(CDR_LOG_INFO, "usb pull out");
+                g_system_event_occur[CDR_EVENT_USB_PULL_IN] = 0;
+            }
+        }
+        usb_insert_his = usb_insert;
+        closedir(dir);
+    }
+    
+    closedir(dir);
+    return;
+}
+
+
 /* 数组转换成16进制字符串，一个字符用两个字符 */
 void cdr_char_array_to_str(char *array, int len, char *str)
 {

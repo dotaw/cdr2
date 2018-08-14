@@ -416,7 +416,7 @@ void cdr_record_can_data()
         
         memset(&data, 0, sizeof(data));
         
-        /* 未接收到can数据 */        
+        /* 未接收到can数据 */
         if (cdr_receive_can_data(&data) != CDR_OK)
         {
             g_system_event_occur[CDR_EVENT_DATA_RECORDING] = 0;
