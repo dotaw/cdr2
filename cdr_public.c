@@ -43,7 +43,7 @@ void cdr_wait_last_diaglog_proc()
 
 /* ---------------------------------------- 文件对外函数 ---------------------------------------- */
 
-/* 获取系统时间，返回格式：2018-04-22 22:23:24 或 2018-04-22 22:23:24.999 */
+/* 获取系统时间，根据入参不同，返回的格式不同，返回格式见cdr_time_type_t */
 void cdr_get_system_time(int type, char *time_info)
 {
    time_t now_time;
@@ -524,3 +524,44 @@ void cdr_led_control()
     close(fd_yellow);
     return;
 }
+
+/* 数组转换成16进制字符串，一个字符用两个字符 */
+void cdr_char_array_to_str(char *array, int len, char *str)
+{
+    int i;
+    
+    memset(str, 0, len * 2 + 1);  /* 数组一个字符转换成两个字符，最后一位\0 */
+    for (i = 0; i < len; i++)
+    {
+        sprintf(str + (i * 2), "%02x", array[i]);
+    }
+    
+    return;
+}
+
+void cdr_aes_set_data_encryption(char *data_in, char *data_out)
+{
+    mbedtls_aes_context aes_ctx;
+    unsigned char dec_plain[16]={0};
+    char str[33] = {0};
+    
+    mbedtls_aes_init(&aes_ctx);    
+    mbedtls_aes_setkey_enc(&aes_ctx, CDR_AES_KEY, 128);
+    
+    /* 加密 */
+    cdr_char_array_to_str(data_in, 16, str);
+    cdr_diag_log(CDR_LOG_DEBUG, "...... encryption before: %s", str);
+    mbedtls_aes_crypt_ecb(&aes_ctx, MBEDTLS_AES_ENCRYPT, data_in, data_out);
+    cdr_char_array_to_str(data_out, 16, str);
+    cdr_diag_log(CDR_LOG_DEBUG, "*********************************** encryption after: %s", str);
+    
+    /* 解密 */
+    mbedtls_aes_setkey_dec(&aes_ctx, CDR_AES_KEY, 128);
+    mbedtls_aes_crypt_ecb(&aes_ctx, MBEDTLS_AES_DECRYPT, data_out, dec_plain);
+    cdr_char_array_to_str(dec_plain, 16, str);
+    cdr_diag_log(CDR_LOG_DEBUG, "...... unencryption after: %s\n", str);
+
+    mbedtls_aes_free(&aes_ctx);
+    return;
+}
+

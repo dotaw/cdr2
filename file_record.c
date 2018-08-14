@@ -148,13 +148,35 @@ int cdr_receive_can_data_simtest(cdr_can_frame_t *data)
     return CDR_ERROR;
 }
 
+void cdr_can_data_to_array_format(cdr_can_frame_t *data, char *data_info)
+{
+    data_info[0] = (data->id >> 24) & 0xff;
+    data_info[1] = (data->id >> 16) & 0xff;
+    data_info[2] = (data->id >> 8) & 0xff;
+    data_info[3] = (data->id) & 0xff;
+    data_info[4] = (data->data >> 56) & 0xff;
+    data_info[5] = (data->data >> 48) & 0xff;
+    data_info[6] = (data->data >> 40) & 0xff;
+    data_info[7] = (data->data >> 32) & 0xff;
+    data_info[8] = (data->data >> 24) & 0xff;
+    data_info[9] = (data->data >> 16) & 0xff;
+    data_info[10] = (data->data >> 8) & 0xff;
+    data_info[11] = (data->data) & 0xff;
+    data_info[12] = (data->len) & 0xff;
+    
+    return;
+}
 
 /* 将获取到的can数据写到文件can.data */
 void cdr_write_can_data_to_file(char *can_file, cdr_can_frame_t *data)
 {
     FILE *fp;
-    char time_info[30] = {0};
-    char data_info[20] = {0};
+    char time_info[16] = {0};
+    char data_info[16] = {0};
+    char key_time[16] = {0};    /* 加密后的数据 */
+    char key_data[16] = {0};    /* 加密后的数据 */
+    char print_info[150] = {0};
+    int i;
     
     if ((fp = fopen(can_file,"a")) == NULL)
     {
@@ -165,7 +187,27 @@ void cdr_write_can_data_to_file(char *can_file, cdr_can_frame_t *data)
     
     /* 讲数据添加时间戳写入文件 */
     cdr_get_system_time(CDR_TIME_S_DIGITAL, time_info);
-    fprintf(fp, "%s %04x %08llx %x\n", time_info, data->id, data->data, data->len); /* 数据均是十六进制保存 */
+    
+    /* 加密 */
+    cdr_aes_set_data_encryption(time_info, key_time);
+    cdr_can_data_to_array_format(data, data_info);
+    cdr_aes_set_data_encryption(data_info, key_data);
+    
+    /* 按照16进制的格式，输出到字符串 */
+    for (i = 0; i < (sizeof(key_time) + sizeof(key_data)); i++)
+    {
+        if (i < sizeof(key_time))
+        {
+            sprintf(print_info + (i * 2), "%02x", key_time[i]);
+        }
+        else
+        {
+            sprintf(print_info + (i * 2), "%02x", key_data[i - sizeof(key_time)]);
+        }
+    }
+
+    /* 写入到文件 */
+    fprintf(fp, "%s\n", print_info);
     fclose(fp);
     
     g_system_event_occur[CDR_EVENT_FILE_RECORD_FAULT] = 0;

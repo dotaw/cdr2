@@ -19,7 +19,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <linux/watchdog.h>
-
+#include "mbedtls/mbedtls/aes.h"
 
 /* ---------------------------------------- 宏定义 ---------------------------------------- */
 
@@ -34,6 +34,8 @@
 #define CDR_DIR_BF_DIAG_MAX_NUM                 15      /* 备份诊断日志的最大数量 */
 
 #define CDR_CAN_DATA_TIME_CALIBRATION_PF        0x6f   /* 时间校准PF标识 */
+
+#define CDR_AES_KEY "1qaz2wsx3edc9027"
 
 
 #define CDR_OK      0  /* 正常返回值 */
@@ -114,7 +116,7 @@ typedef enum cdr_event {
 
 typedef struct cdr_can_frame {
     int id;             /* can帧id */
-    long long data;       /* can数据 */
+    long long data;     /* can数据 */
     int len;            /* can数据长度 */
 } cdr_can_frame_t;
 

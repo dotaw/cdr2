@@ -2,7 +2,7 @@
 CC = /opt/gcc-4.4.4-glibc-2.11.1-multilib-1.0/arm-fsl-linux-gnueabi/bin/arm-linux-gcc
 
 # CFLAG包括头文件目录  
-#CFLAGS = -I/mnt/code/mysql/include/mysql
+CFLAGS = -I/mbedtls/mbedtls
 
 # 头文件查找路径  
 INC = -I./
@@ -18,7 +18,9 @@ TARGET = can_data_record2
 SRC = cdr_main.c \
       file_record.c \
       cdr_public.c \
-	  cdr_fmea.c
+      cdr_fmea.c \
+      mbedtls/aes.c \
+      mbedtls/platform_util.c
 
 # 源文件编译为目标文件  
 OBJS = $(SRC:.c=.o)  
