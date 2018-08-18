@@ -394,10 +394,10 @@ void cdr_can_data_proc(cdr_can_frame_t *data)
 
     /* 文件记录 */
     cdr_write_can_data_to_file(CDR_FILE_DISK1_CANDATA, data);
-    cdr_write_can_data_to_file(CDR_FILE_DISK2_CANDATA, data);
+    //cdr_write_can_data_to_file(CDR_FILE_DISK2_CANDATA, data);
     
     cdr_can_data_file_proc(CDR_FILE_DISK1_CANDATA, CDR_FILE_DISK1_DIR_INFO, CDR_FILE_DIR_DISK1_CANDATA_BF);
-    cdr_can_data_file_proc(CDR_FILE_DISK2_CANDATA, CDR_FILE_DISK2_DIR_INFO, CDR_FILE_DIR_DISK2_CANDATA_BF);
+    //cdr_can_data_file_proc(CDR_FILE_DISK2_CANDATA, CDR_FILE_DISK2_DIR_INFO, CDR_FILE_DIR_DISK2_CANDATA_BF);
     
     g_system_event_occur[CDR_EVENT_DATA_RECORDING] = 1;
     return;

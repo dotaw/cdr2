@@ -89,11 +89,11 @@ void cdr_global_init()
 {
     char *directory[] = 
     {
-        CDR_FILE_DIR_RECORDER,
+        //CDR_FILE_DIR_RECORDER,
         CDR_FILE_DIR_DIAGLOG,
         CDR_FILE_DIR_DIAGLOG_BF,
-        CDR_FILE_DIR_DISK1,
-        CDR_FILE_DIR_DISK2,
+        //CDR_FILE_DIR_DISK1,
+        //CDR_FILE_DIR_DISK2,
         CDR_FILE_DIR_DISK1_CANDATA,
         CDR_FILE_DIR_DISK2_CANDATA,
         CDR_FILE_DIR_DISK1_CANDATA_BF,

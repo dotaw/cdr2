@@ -6,47 +6,39 @@
     2、硬盘空间剩余15%告警，红灯闪烁，此时会覆盖部分数据
     3、硬盘空间剩余2%告警， 红灯闪烁，此时会覆盖所有数据
  */
-void cdr_fmea_disk_free_size()
+void cdr_fmea_disk_free_size(char *disk_dir)
 {
-    int size_total_1;
-    int size_total_2;
-    int size_free_1;
-    int size_free_2;
-    int state_1;
-    int state_2;
+    int size_total;
+    int size_free;
+    int state;
     
     /* 硬盘总空间 */
-    size_total_1 = cdr_get_disk_size_total(CDR_FILE_DIR_DISK1);
-    size_total_2 = cdr_get_disk_size_total(CDR_FILE_DIR_DISK2);
+    size_total = cdr_get_disk_size_total(disk_dir);
     
     /* 硬盘可用空间 */
-    size_free_1  = cdr_get_disk_size_free(CDR_FILE_DIR_DISK1);
-    size_free_2  = cdr_get_disk_size_free(CDR_FILE_DIR_DISK2);  
+    size_free  = cdr_get_disk_size_free(disk_dir);
     
-    if ((size_total_1 == 0) || (size_total_2 == 0))
+    if (size_total == 0)
     {    
         g_system_event_occur[CDR_EVENT_STORAGE_NULL] = 1; /* 获取失败，上报严重告警 */
         return;
     }
     
-    state_1 = (size_free_1 * 100) / size_total_1;
-    state_2 = (size_free_2 * 100) / size_total_2;
+    state = (size_free * 100) / size_total;
     
-    //cdr_diag_log(CDR_LOG_DEBUG, "The cdr_fmea_disk_free_size  disk1： size_total %u size_free %u state%u", 
-    //    size_total_1, size_free_1, state_1);
-    //cdr_diag_log(CDR_LOG_DEBUG, "The cdr_fmea_disk_free_size  disk2： size_total %u size_free %u state%u", 
-    //    size_total_2, size_free_2, state_2);
-    
-    if ((state_1 < CDR_STORAGE_NULL_THRESHOLD) || (state_2 < CDR_STORAGE_NULL_THRESHOLD)) /* 不足2% */
+    //cdr_diag_log(CDR_LOG_DEBUG, "The cdr_fmea_disk_free_size  %s： size_total %u size_free %u state%u", 
+    //    disk_dir, size_total, size_free, state);
+
+    if (state < CDR_STORAGE_NULL_THRESHOLD) /* 不足2% */
     {
         g_system_event_occur[CDR_EVENT_STORAGE_NULL] = 1; 
     }    
-    else if ((state_1 < CDR_STORAGE_ALARM_THRESHOLD) || (state_2 < CDR_STORAGE_ALARM_THRESHOLD)) /* 不足10% */
+    else if (state < CDR_STORAGE_ALARM_THRESHOLD) /* 不足10% */
     {
         g_system_event_occur[CDR_EVENT_STORAGE_NULL] = 0;
-        g_system_event_occur[CDR_EVENT_STORAGE_ALARM] = 1;        
+        g_system_event_occur[CDR_EVENT_STORAGE_ALARM] = 1;
     }    
-    else if ((state_1 < CDR_STORAGE_WARNING_THRESHOLD) || (state_2 < CDR_STORAGE_WARNING_THRESHOLD)) /* 不足20% */
+    else if (state < CDR_STORAGE_WARNING_THRESHOLD) /* 不足20% */
     {
         g_system_event_occur[CDR_EVENT_STORAGE_NULL] = 0;
         g_system_event_occur[CDR_EVENT_STORAGE_ALARM] = 0;
@@ -113,6 +105,7 @@ void cdr_fmea_system_event_led_proc()
         {CDR_EVENT_STORAGE_NULL,           CDR_LED_RED_FLASH},
         {CDR_EVENT_USB_PULL_IN,            CDR_LED_BLUE_CONTINUOUS},
         {CDR_EVENT_DATA_TO_USB,            CDR_LED_BLUE_FLASH},
+        {CDR_EVENT_USB_STORAGE_ALARM,      CDR_LED_RED_FLASH},
     };
     
     for (i = 0; i < CDR_EVENT_MAX - CDR_EVENT_FILE_RECORD_FAULT; i++)
@@ -212,7 +205,8 @@ void cdr_fmea_fault_sim_proc()
 /* 1s定时器 */
 void cdr_fmea_1s_timer()
 {
-    cdr_fmea_disk_free_size();    
+    cdr_fmea_disk_free_size(CDR_FILE_DIR_DISK1);    
+    //cdr_fmea_disk_free_size(CDR_FILE_DIR_DISK2);
     cdr_fmea_fault_sim_proc();    
     cdr_fmea_system_event_led_proc();
     

@@ -555,6 +555,24 @@ void cdr_cpy_data_to_usb(char *data_dir, char *usb_dir, char *usb_dir_name)
     return;
 }
 
+int cdr_usb_storage_space_enough(char *usb_dir)
+{
+    int data_size;
+    int usb_size;
+    
+    data_size = cdr_get_disk_size_total(CDR_FILE_DIR_DISK1) 
+                    - cdr_get_disk_size_free(CDR_FILE_DIR_DISK1);
+    usb_size = cdr_get_disk_size_free(usb_dir);
+    
+    cdr_diag_log(CDR_LOG_INFO, "usb_storage_space_info data size %u, usb size %u", data_size, usb_size);
+    
+    if (usb_size < data_size * 1.2)
+    {
+        return CDR_ERROR;
+    }
+    return CDR_OK;
+}
+
 void cdr_usb_detect()
 {
     DIR *dir = NULL;
@@ -597,15 +615,23 @@ void cdr_usb_detect()
                 
                 sleep(3); /* 延时3s */
                 
-                g_system_event_occur[CDR_EVENT_DATA_TO_USB] = 1;
-                cdr_cpy_data_to_usb(CDR_FILE_DIR_DISK1_CANDATA, usb_dir, "can_data_disk1");
-                cdr_cpy_data_to_usb(CDR_FILE_DIR_DISK2_CANDATA, usb_dir, "can_data_disk2");
-                g_system_event_occur[CDR_EVENT_DATA_TO_USB] = 1;
+                if (cdr_usb_storage_space_enough(usb_dir) == CDR_OK)
+                {                
+                    g_system_event_occur[CDR_EVENT_DATA_TO_USB] = 1;
+                    cdr_cpy_data_to_usb(CDR_FILE_DIR_DISK1_CANDATA, usb_dir, "cdr_can_data");
+                    //cdr_cpy_data_to_usb(CDR_FILE_DIR_DISK2_CANDATA, usb_dir, "can_data_disk2");
+                    g_system_event_occur[CDR_EVENT_DATA_TO_USB] = 0;
+                }
+                else
+                {
+                    g_system_event_occur[CDR_EVENT_USB_STORAGE_ALARM] = 1;
+                }
             }
             else
             {
                 cdr_diag_log(CDR_LOG_INFO, "usb pull out");
                 g_system_event_occur[CDR_EVENT_USB_PULL_IN] = 0;
+                g_system_event_occur[CDR_EVENT_USB_STORAGE_ALARM] = 0;
             }
         }
         usb_insert_his = usb_insert;
