@@ -71,7 +71,9 @@ void cdr_fmea_set_led_state(int led_state)
     {
         /* 优先级排列，越前面，优先级别越高 */
         CDR_LED_RED_CONTINUOUS, 
-        CDR_LED_RED_FLASH,        
+        CDR_LED_RED_FLASH,
+        CDR_LED_BLUE_FLASH,
+        CDR_LED_BLUE_CONTINUOUS,
         CDR_LED_YELLOW_FLASH,
         CDR_LED_YELLOW_CONTINUOUS, 
         CDR_LED_GREEN_FLASH, 
@@ -109,8 +111,8 @@ void cdr_fmea_system_event_led_proc()
         {CDR_EVENT_STORAGE_WARNING,        CDR_LED_YELLOW_FLASH},
         {CDR_EVENT_DATA_RECORDING,         CDR_LED_GREEN_FLASH},
         {CDR_EVENT_STORAGE_NULL,           CDR_LED_RED_FLASH},
-        {CDR_EVENT_USB_PULL_IN,            CDR_LED_GREEN_CONTINUOUS},
-        {CDR_EVENT_DATA_TO_USB,            CDR_LED_YELLOW_FLASH},
+        {CDR_EVENT_USB_PULL_IN,            CDR_LED_BLUE_CONTINUOUS},
+        {CDR_EVENT_DATA_TO_USB,            CDR_LED_BLUE_FLASH},
     };
     
     for (i = 0; i < CDR_EVENT_MAX - CDR_EVENT_FILE_RECORD_FAULT; i++)

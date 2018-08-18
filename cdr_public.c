@@ -412,7 +412,7 @@ void cdr_set_led_state(int type)
         case CDR_LED_RED_CONTINUOUS : 
         sprintf(g_led_state.set_red, "1");
         sprintf(g_led_state.set_green, "0");
-        sprintf(g_led_state.set_yellow, "0");
+        sprintf(g_led_state.set_blue, "0");
         g_led_state.is_flash = 0;
         break;
         
@@ -420,23 +420,23 @@ void cdr_set_led_state(int type)
         case CDR_LED_RED_FLASH :
         sprintf(g_led_state.set_red, "1");
         sprintf(g_led_state.set_green, "0");
-        sprintf(g_led_state.set_yellow, "0");
+        sprintf(g_led_state.set_blue, "0");
         g_led_state.is_flash = 1;
         break;
         
         /* 黄灯常亮 */
         case CDR_LED_YELLOW_CONTINUOUS :
-        sprintf(g_led_state.set_red, "0");
-        sprintf(g_led_state.set_green, "0");
-        sprintf(g_led_state.set_yellow, "1");
+        sprintf(g_led_state.set_red, "1");
+        sprintf(g_led_state.set_green, "1");
+        sprintf(g_led_state.set_blue, "0");
         g_led_state.is_flash = 0;
         break;
         
         /* 黄灯闪烁 */
         case CDR_LED_YELLOW_FLASH :
-        sprintf(g_led_state.set_red, "0");
-        sprintf(g_led_state.set_green, "0");
-        sprintf(g_led_state.set_yellow, "1");
+        sprintf(g_led_state.set_red, "1");
+        sprintf(g_led_state.set_green, "1");
+        sprintf(g_led_state.set_blue, "0");
         g_led_state.is_flash = 1;
         break;
         
@@ -444,7 +444,7 @@ void cdr_set_led_state(int type)
         case CDR_LED_GREEN_FLASH :
         sprintf(g_led_state.set_red, "0");
         sprintf(g_led_state.set_green, "1");
-        sprintf(g_led_state.set_yellow, "0");
+        sprintf(g_led_state.set_blue, "0");
         g_led_state.is_flash = 1;
         break;
         
@@ -452,10 +452,26 @@ void cdr_set_led_state(int type)
         case CDR_LED_GREEN_CONTINUOUS :
         sprintf(g_led_state.set_red, "0");
         sprintf(g_led_state.set_green, "1");
-        sprintf(g_led_state.set_yellow, "0");
+        sprintf(g_led_state.set_blue, "0");
         g_led_state.is_flash = 0;
         break;
-                
+        
+        /* 蓝灯闪烁 */
+        case CDR_LED_BLUE_FLASH :
+        sprintf(g_led_state.set_red, "0");
+        sprintf(g_led_state.set_green, "0");
+        sprintf(g_led_state.set_blue, "1");
+        g_led_state.is_flash = 1;
+        break;
+        
+        /* 蓝灯常亮 */
+        case CDR_LED_BLUE_CONTINUOUS :
+        sprintf(g_led_state.set_red, "0");
+        sprintf(g_led_state.set_green, "0");
+        sprintf(g_led_state.set_blue, "1");
+        g_led_state.is_flash = 0;
+        break;
+        
         default :
         break;
     }    
@@ -475,7 +491,7 @@ void cdr_led_control()
 {
     int fd_red;
     int fd_green;
-    int fd_yellow;
+    int fd_blue;
 
     cdr_diag_log(CDR_LOG_INFO, "cdr_led_control >>>>>>>>>>>>>>>>>>>>>>>>>>in");
     
@@ -493,12 +509,12 @@ void cdr_led_control()
         close(fd_red);
         return;
     }    
-    fd_yellow = open("/sys/class/gpio/gpio102/value", O_RDWR);
-    if (fd_yellow < 0)
+    fd_blue = open("/sys/class/gpio/gpio102/value", O_RDWR);
+    if (fd_blue < 0)
     {
-        cdr_diag_log(CDR_LOG_ERROR, "cdr_led_control open gpio value error yellow %d", fd_yellow);
+        cdr_diag_log(CDR_LOG_ERROR, "cdr_led_control open gpio value error blue %d", fd_blue);
         close(fd_red);
-        close(fd_yellow);
+        close(fd_green);
         return;
     }    
     
@@ -506,22 +522,22 @@ void cdr_led_control()
     {
         write(fd_red,    g_led_state.set_red,    1);
         write(fd_green,  g_led_state.set_green,  1);
-        write(fd_yellow, g_led_state.set_yellow, 1);
-        sleep(1);
+        write(fd_blue, g_led_state.set_blue, 1);
+        usleep(300000); //延迟0.3s
         
         /* 处理闪烁 */
         if (g_led_state.is_flash)
         {
             write(fd_red,    "0", 1);
             write(fd_green,  "0", 1);
-            write(fd_yellow, "0", 1);
-            sleep(1);            
+            write(fd_blue, "0", 1);
+            usleep(300000); //延迟0.3s
         }
     }
     
     close(fd_red);
     close(fd_green);
-    close(fd_yellow);
+    close(fd_blue);
     return;
 }
 

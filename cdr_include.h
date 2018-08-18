@@ -102,7 +102,9 @@ typedef enum cdr_led_state {
     CDR_LED_YELLOW_CONTINUOUS   = 0x4,        /* 黄灯常亮 */
     CDR_LED_YELLOW_FLASH        = 0x8,        /* 黄灯闪烁 */
     CDR_LED_GREEN_FLASH         = 0x10,       /* 绿灯闪烁 */
-    CDR_LED_GREEN_CONTINUOUS    = 0x20,       /* 绿灯常亮 */    
+    CDR_LED_GREEN_CONTINUOUS    = 0x20,       /* 绿灯常亮 */
+    CDR_LED_BLUE_FLASH          = 0x40,       /* 蓝灯闪烁 */
+    CDR_LED_BLUE_CONTINUOUS     = 0x80,       /* 蓝灯常亮 */        
 } cdr_led_state_t;
 
 typedef enum cdr_event {  
@@ -126,7 +128,7 @@ typedef struct cdr_led_set_state {
     int state;                                             /* LED的状态 */
     char set_red[4];                                       /* 红灯是否输出 */
     char set_green[4];                                     /* 绿灯是否输出 */
-    char set_yellow[4];                                    /* 黄灯是否输出 */
+    char set_blue[4];                                      /* 蓝灯是否输出 */
     int is_flash;                                          /* 灯是否闪烁 */
 } cdr_led_set_state_t;
 
