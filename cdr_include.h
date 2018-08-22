@@ -115,7 +115,8 @@ typedef enum cdr_event {
     CDR_EVENT_DATA_RECORDING,           /* 5、数据正常存储事件 */
     CDR_EVENT_USB_PULL_IN,              /* 6、usb设备插入 */
     CDR_EVENT_DATA_TO_USB,              /* 7、cpy数据到usb设备 */
-    CDR_EVENT_USB_STORAGE_ALARM,        /* 8、cpy数据到usb设备 */
+    CDR_EVENT_USB_STORAGE_ALARM,        /* 8、cpy数据到usb设备空间不足 */
+    CDR_EVENT_DATA_TO_USB_END,          /* 9、cpy数据到usb设备已经完成 */
     CDR_EVENT_MAX,
 } cdr_event_t;
 

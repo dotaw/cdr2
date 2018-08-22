@@ -103,9 +103,10 @@ void cdr_fmea_system_event_led_proc()
         {CDR_EVENT_STORAGE_WARNING,        CDR_LED_YELLOW_FLASH},
         {CDR_EVENT_DATA_RECORDING,         CDR_LED_GREEN_FLASH},
         {CDR_EVENT_STORAGE_NULL,           CDR_LED_RED_FLASH},
-        {CDR_EVENT_USB_PULL_IN,            CDR_LED_BLUE_CONTINUOUS},
+        {CDR_EVENT_USB_PULL_IN,            CDR_LED_YELLOW_CONTINUOUS},
         {CDR_EVENT_DATA_TO_USB,            CDR_LED_BLUE_FLASH},
         {CDR_EVENT_USB_STORAGE_ALARM,      CDR_LED_RED_FLASH},
+        {CDR_EVENT_DATA_TO_USB_END,        CDR_LED_BLUE_CONTINUOUS},
     };
     
     for (i = 0; i < CDR_EVENT_MAX - CDR_EVENT_FILE_RECORD_FAULT; i++)
