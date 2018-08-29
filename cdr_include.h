@@ -56,16 +56,16 @@
 #define CDR_FILE_DIR_DIAGLOG           "/opt/myapp/cdr_recorder/diag/"          /* 诊断日志打印目录，用于问题的定位 */
 #define CDR_FILE_DIR_DIAGLOG_BF        "/opt/myapp/cdr_recorder/diag/bf/"       /* 诊断日志的缓存目录，数量有最大门限CDR_DIR_BF_DIAG_MAX_NUM */
 #define CDR_FILE_DIR_DISK1             "/opt/myapp/disk1/"                      /* 硬盘1对应的目录 */
-#define CDR_FILE_DIR_DISK2             "/opt/myapp/disk2/"                      /* 硬盘2对应的目录 */
+//#define CDR_FILE_DIR_DISK2             "/opt/myapp/disk2/"                      /* 硬盘2对应的目录 */
 #define CDR_FILE_DIR_DISK1_CANDATA     "/opt/myapp/disk1/data/"                 /* 硬盘1文件存储目录 */
-#define CDR_FILE_DIR_DISK2_CANDATA     "/opt/myapp/disk2/data/"                 /* 硬盘2文件存储目录 */
+//#define CDR_FILE_DIR_DISK2_CANDATA     "/opt/myapp/disk2/data/"                 /* 硬盘2文件存储目录 */
 #define CDR_FILE_DIR_DISK1_CANDATA_BF  "/opt/myapp/disk1/data/bf/"              /* 硬盘1文件历史存储目录 */
-#define CDR_FILE_DIR_DISK2_CANDATA_BF  "/opt/myapp/disk2/data/bf/"              /* 硬盘2文件历史存储目录 */
+//#define CDR_FILE_DIR_DISK2_CANDATA_BF  "/opt/myapp/disk2/data/bf/"              /* 硬盘2文件历史存储目录 */
 
 #define CDR_FILE_DISK1_CANDATA         "/opt/myapp/disk1/data/can.data"       /* 硬盘1的记录文件 */
-#define CDR_FILE_DISK2_CANDATA         "/opt/myapp/disk2/data/can.data"       /* 硬盘2的记录文件 */
+//#define CDR_FILE_DISK2_CANDATA         "/opt/myapp/disk2/data/can.data"       /* 硬盘2的记录文件 */
 #define CDR_FILE_DISK1_DIR_INFO         "/opt/myapp/disk1/data/dir.info"      /* 硬盘1的历史记录文件的目录信息 */
-#define CDR_FILE_DISK2_DIR_INFO         "/opt/myapp/disk2/data/dir.info"      /* 硬盘2的历史记录文件的目录信息 */
+//#define CDR_FILE_DISK2_DIR_INFO         "/opt/myapp/disk2/data/dir.info"      /* 硬盘2的历史记录文件的目录信息 */
 
 #define CDR_FILE_DIAGLOG_RECORD       "/opt/myapp/cdr_recorder/diag/diag.log"        /* 诊断日志记录文件 */
 #define CDR_FILE_DIAGLOG_BF_RECORD    "/opt/myapp/cdr_recorder/diag/bf/diag%s.log"   /* 保存历史诊断日志文件 */

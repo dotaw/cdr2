@@ -95,9 +95,9 @@ void cdr_global_init()
         //CDR_FILE_DIR_DISK1,
         //CDR_FILE_DIR_DISK2,
         CDR_FILE_DIR_DISK1_CANDATA,
-        CDR_FILE_DIR_DISK2_CANDATA,
+        //CDR_FILE_DIR_DISK2_CANDATA,
         CDR_FILE_DIR_DISK1_CANDATA_BF,
-        CDR_FILE_DIR_DISK2_CANDATA_BF,
+        //CDR_FILE_DIR_DISK2_CANDATA_BF,
     };
     int i;
     DIR *dir;
@@ -142,9 +142,10 @@ int cdr_main_can_if_init()
     struct ifreq ifr;
     
     /* 设置速率 */
-    system("ifconfig can0 down");
-    system("echo 250000 > /sys/devices/platform/FlexCAN.0/bitrate");
-    system("ifconfig can0 up");
+    //初始化放到启动文件中
+    //system("ifconfig can0 down");
+    //system("echo 250000 > /sys/devices/platform/FlexCAN.0/bitrate");
+    //system("ifconfig can0 up");
     
     cdr_diag_log(CDR_LOG_INFO, "cdr_main_can_if_init PF_CAN=%u", PF_CAN);
     
