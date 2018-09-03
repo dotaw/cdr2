@@ -547,11 +547,17 @@ void cdr_cpy_data_to_usb(char *data_dir, char *usb_dir, char *usb_dir_name)
     
     sprintf(command, "mkdir %s/%s", usb_dir, usb_dir_name);
     system(command);
+    cdr_diag_log(CDR_LOG_INFO, "%s", command);
     
     memset(command, 0, sizeof(command));
     sprintf(command, "cp -rf %s %s/%s", data_dir, usb_dir, usb_dir_name);
     system(command);
+    cdr_diag_log(CDR_LOG_INFO, "%s", command);
     
+    memset(command, 0, sizeof(command));
+    sprintf(command, "umount %s", usb_dir);
+    system(command);
+    cdr_diag_log(CDR_LOG_INFO, "%s", command);    
     return;
 }
 
