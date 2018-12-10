@@ -159,8 +159,8 @@ int cdr_main_can_if_init()
             continue;
         }
         
-        /* 把套接字绑定到can0接口    */
-        strcpy(ifr.ifr_name, "can0");
+        /* 把套接字绑定到can1接口    */
+        strcpy(ifr.ifr_name, "can1");
         ret = ioctl(g_socket_fd, SIOCGIFINDEX, &ifr);                
         if (ret < 0) 
         {
