@@ -145,7 +145,9 @@ int g_wdt_fd;                                     /* 看门狗 */
 int g_pthread_record_data_active;                 /* 数据记录线程是否正常运行 */  
 int g_time_calibration_invalid;                   /* 时间校准是否生效，开机运行仅第一次时间校准生效 */
 cdr_led_set_state_t g_led_state;                  /* LED状态灯当前状态 */
- 
+int g_net_sockfd; 
+struct sockaddr_in g_net_addr;
+struct sockaddr_in g_net_addr_remote;
 
 /* ---------------------------------------- 函数声明 ---------------------------------------- */
 /* cdr_main */

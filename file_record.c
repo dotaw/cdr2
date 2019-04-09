@@ -175,8 +175,10 @@ void cdr_write_can_data_to_file(char *can_file, cdr_can_frame_t *data)
     char data_info[16] = {0};
     char key_time[16] = {0};    /* 加密后的数据 */
     char key_data[16] = {0};    /* 加密后的数据 */
+    char send_net_data[150] = {0};    /* 加密后的数据 */
     char print_info[150] = {0};
     int i;
+    int num;
     
     if ((fp = fopen(can_file,"a")) == NULL)
     {
@@ -209,6 +211,25 @@ void cdr_write_can_data_to_file(char *can_file, cdr_can_frame_t *data)
     /* 写入到文件 */
     fprintf(fp, "%s\n", print_info);
     fclose(fp);
+    
+    /* 按照16进制的格式，输出到字符串 */
+    for (i = 0; i < (sizeof(time_info) + sizeof(data_info)); i++)
+    {
+        if (i < sizeof(time_info))
+        {
+            sprintf(send_net_data + (i * 2), "%02x", time_info[i]);
+        }
+        else
+        {
+            sprintf(send_net_data + (i * 2), "%02x", data_info[i - sizeof(time_info)]);
+        }
+    }
+    num = sendto(g_net_sockfd, send_net_data, strlen(send_net_data), 0, (struct sockaddr *)&g_net_addr_remote, sizeof(struct sockaddr_in));
+    if (num < 0)
+    {
+        cdr_diag_log(CDR_LOG_ERROR, "Failed to send net data!");
+    }
+    cdr_diag_log(CDR_LOG_DEBUG, "SEND:%s", send_net_data);
     
     g_system_event_occur[CDR_EVENT_FILE_RECORD_FAULT] = 0;
     return;
@@ -407,9 +428,46 @@ void cdr_can_data_proc(cdr_can_frame_t *data)
 void cdr_record_can_data()
 {
     cdr_can_frame_t data = {0};
-
+    socklen_t sock_len;
+    int yes;
+    
     cdr_diag_log(CDR_LOG_INFO, "cdr_record_can_data >>>>>>>>>>>>>>>>>>>>>>>>>>in");
 
+    /* 创建socket udp */
+    g_net_sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (g_net_sockfd < 0) {
+        cdr_diag_log(CDR_LOG_ERROR, "cdr_record_can_data creat g_net_sockfd error");
+        cdr_system_reboot();
+        return;
+    }
+    cdr_diag_log(CDR_LOG_INFO, "cdr_record_can_data creat g_net_sockfd ok");
+    
+    /* 设置通讯方式对广播，即本程序发送的一个消息，网络上所有主机均可以收到 */
+    yes = 1;
+    setsockopt(g_net_sockfd, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(yes));
+    
+    /* 绑定到端口 */
+    sock_len = sizeof(g_net_addr);
+    (void)memset(&g_net_addr, 0, sock_len);
+    g_net_addr.sin_family = AF_INET;
+    //g_net_addr.sin_addr.s_addr = htonl("192.168.2.136");
+    g_net_addr.sin_port = htons(9027);
+    inet_pton(AF_INET, "192.168.1.136", &g_net_addr.sin_addr);
+
+    g_net_addr_remote.sin_family = AF_INET;          		// Protocol Family
+    g_net_addr_remote.sin_port = htons(9027);          		// Port number
+    inet_pton(AF_INET, "192.168.1.255", &g_net_addr_remote.sin_addr); 	// Net Address
+    memset (g_net_addr_remote.sin_zero,0,8);                  	// Flush the rest of struct
+    
+    if (bind(g_net_sockfd, (struct sockaddr*)&g_net_addr, sizeof(struct sockaddr)) == -1)
+    {  
+        cdr_diag_log(CDR_LOG_ERROR, "Failed to bind Port");
+    }
+    else 
+    {
+        cdr_diag_log(CDR_LOG_INFO, "cdr_record_can_data bind port ok");
+    }
+   
     while (1) 
     {        
         g_pthread_record_data_active = 1;
