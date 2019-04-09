@@ -443,31 +443,17 @@ void cdr_record_can_data()
     cdr_diag_log(CDR_LOG_INFO, "cdr_record_can_data creat g_net_sockfd ok");
     
     /* 设置通讯方式对广播，即本程序发送的一个消息，网络上所有主机均可以收到 */
-    yes = 1;
-    setsockopt(g_net_sockfd, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(yes));
-    
-    /* 绑定到端口 */
-    sock_len = sizeof(g_net_addr);
-    (void)memset(&g_net_addr, 0, sock_len);
-    g_net_addr.sin_family = AF_INET;
-    //g_net_addr.sin_addr.s_addr = htonl("192.168.2.136");
-    g_net_addr.sin_port = htons(9027);
-    inet_pton(AF_INET, "192.168.1.136", &g_net_addr.sin_addr);
-
-    g_net_addr_remote.sin_family = AF_INET;          		// Protocol Family
-    g_net_addr_remote.sin_port = htons(9027);          		// Port number
-    inet_pton(AF_INET, "192.168.1.255", &g_net_addr_remote.sin_addr); 	// Net Address
-    memset (g_net_addr_remote.sin_zero,0,8);                  	// Flush the rest of struct
-    
-    if (bind(g_net_sockfd, (struct sockaddr*)&g_net_addr, sizeof(struct sockaddr)) == -1)
-    {  
-        cdr_diag_log(CDR_LOG_ERROR, "Failed to bind Port");
-    }
-    else 
+    if (is_broadcast == 1)
     {
-        cdr_diag_log(CDR_LOG_INFO, "cdr_record_can_data bind port ok");
+        yes = 1;
+        setsockopt(g_net_sockfd, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(yes));
     }
-   
+
+    g_net_addr_remote.sin_family = AF_INET;
+    g_net_addr_remote.sin_port = htons(9027); //发数据的端口号
+    inet_pton(AF_INET, send_net_ip, &g_net_addr_remote.sin_addr);
+    memset(g_net_addr_remote.sin_zero,0,8);
+
     while (1) 
     {        
         g_pthread_record_data_active = 1;

@@ -1,11 +1,23 @@
 #include "cdr_include.h"
 
-void main()
+void main(int argc, char* argv[])
 {
     pthread_t pthread_record_data;
     pthread_t pthread_fmea;
     pthread_t pthread_led;
     pthread_t pthread_usb;
+    
+    is_broadcast = 1; //默认广播模式
+    memset(send_net_ip, 0, sizeof(send_net_ip));
+    if (argc >= 2)
+    {
+        sprintf(send_net_ip, "%s", argv[1]);
+        is_broadcast = 0;
+    }
+    else
+    {
+        sprintf(send_net_ip, "192.168.100.255");
+    }
     
     /* 1、全局初始化，初始化全局变量，如果程序需要的目录不存在，需要创建目录 */
     cdr_global_init();
